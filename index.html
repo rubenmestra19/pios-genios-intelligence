@@ -1110,6 +1110,13 @@
         <div class="status-pill" id="intelligence-status">● cargando...</div>
       </div>
 
+      <div class="card" style="margin-bottom:16px;">
+        <h3>Briefing Semanal (IA)</h3>
+        <div class="hint">Claude lee los datos reales de los 5 Centros y redacta el resumen — el mismo Ciclo Semanal de Decisión del Método Genios, automatizado</div>
+        <button class="btn-gold btn-sm" onclick="generarBriefingSemanal()">Generar briefing</button>
+        <div id="briefing-resultado" style="display:none;margin-top:12px;padding:14px;background:var(--panel-2);border-radius:8px;font-size:13px;line-height:1.6;white-space:pre-wrap;"></div>
+      </div>
+
       <div class="grid grid-3">
         <div class="card">
           <h3>Red — avances</h3>
@@ -1622,10 +1629,59 @@ document.getElementById('zona-list').innerHTML = zonas.map(z=>`
     <span class="zona-meta">${z.meta}</span>
   </div>`).join('');
 
-function procesarVisita(){
-  const val = document.getElementById('visita-input').value.trim();
-  if(!val) return;
-  document.getElementById('ia-result').classList.add('show');
+async function procesarVisita(){
+  const texto = document.getElementById('visita-input').value.trim();
+  if(!texto){ mostrarToast('Escribe el reporte de la visita.'); return; }
+
+  mostrarToast('Procesando con IA...');
+
+  const prompt = `Analiza este reporte de una visita de campaña política y responde ÚNICAMENTE con un JSON válido, sin texto antes ni después, con este formato exacto:
+{"zona": "nombre de la zona o barrio mencionado, o null si no se menciona", "sentimiento": "positivo, negativo o neutral", "solicitudes": ["lista de solicitudes o problemas mencionados"], "prioridad": "alta, media o baja", "hogares_visitados": numero o null}
+
+Texto del reporte: "${texto}"`;
+
+  try {
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt })
+    });
+    const data = await resp.json();
+
+    if(data.error){ mostrarToast('Error de IA: ' + data.error); return; }
+
+    let estructurado;
+    try {
+      const match = data.text.match(/\{[\s\S]*\}/);
+      estructurado = JSON.parse(match ? match[0] : data.text);
+    } catch(e){
+      mostrarToast('La IA respondió pero no se pudo interpretar el resultado. Intenta de nuevo.');
+      return;
+    }
+
+    const { error } = await supabaseClient.from('visitas').insert({
+      texto_original: texto,
+      resumen_ia: estructurado,
+      corregimiento_vereda: estructurado.zona || null
+    });
+    if(error){ mostrarToast('Se procesó pero no se pudo guardar: ' + error.message); }
+
+    document.getElementById('ia-result').classList.add('show');
+    document.getElementById('ia-result').innerHTML = `
+      <div>
+        <span class="tag">Zona: ${estructurado.zona||'sin identificar'}</span>
+        <span class="tag">Sentimiento: ${estructurado.sentimiento||'?'}</span>
+        <span class="tag">Prioridad: ${estructurado.prioridad||'?'}</span>
+      </div>
+      <div style="margin-top:8px;">Solicitud(es) detectada(s): <strong>${(estructurado.solicitudes||[]).join(', ')||'ninguna'}</strong>.
+      ${estructurado.hogares_visitados ? 'Hogares visitados: <strong>'+estructurado.hogares_visitados+'</strong>.' : ''}
+      Guardado en Memoria Política.</div>`;
+
+    document.getElementById('visita-input').value = '';
+    mostrarToast('Visita procesada y guardada.');
+  } catch(err){
+    mostrarToast('Error de conexión con la IA: ' + err.message);
+  }
 }
 
 // ---------- POLITICO: fichaje real (Supabase) ----------
@@ -2595,6 +2651,61 @@ async function reportarPercepcion(){
 }
 
 // ---------- INTELLIGENCE CENTER: resumen real combinando los Centros conectados ----------
+async function generarBriefingSemanal(){
+  const boton = document.querySelector('button[onclick="generarBriefingSemanal()"]');
+  boton.disabled = true;
+  boton.textContent = 'Generando...';
+  mostrarToast('Claude está leyendo los datos de los 5 Centros...');
+
+  try {
+    // Reunir datos reales — los mismos que ya usa Intelligence Center
+    const [bdMain, gastosConf, ingresosData, reportes, sugerencias, actas] = await Promise.all([
+      supabaseClient.from('bd_main').select('corregimiento_vereda, referido_por'),
+      supabaseClient.from('gastos_confirmados').select('monto, rubro'),
+      supabaseClient.from('ingresos').select('monto').eq('estado','confirmado'),
+      supabaseClient.from('reportes_percepcion').select('tema_extraido'),
+      supabaseClient.from('sugerencias_fichaje').select('nombre_sugerido, categoria'),
+      supabaseClient.from('actas_reuniones').select('tema, decisiones_tomadas, tareas_pendientes').order('fecha',{ascending:false}).limit(3)
+    ]);
+
+    const totalPersonas = (bdMain.data||[]).length;
+    const totalGasto = (gastosConf.data||[]).reduce((s,g)=>s+Number(g.monto),0);
+    const totalIngreso = (ingresosData.data||[]).reduce((s,i)=>s+Number(i.monto),0);
+    const temasReportados = (reportes.data||[]).map(r=>r.tema_extraido).join(', ') || 'ninguno';
+    const nombresFichajes = (sugerencias.data||[]).map(s=>s.nombre_sugerido).join(', ') || 'ninguno';
+    const actasResumen = (actas.data||[]).map(a=>`- ${a.tema}: ${a.decisiones_tomadas}${a.tareas_pendientes ? ' (pendiente: '+a.tareas_pendientes+')' : ''}`).join('\n') || 'sin actas recientes';
+
+    const prompt = `Eres el analista de Genios Intelligence. Con estos datos reales de la campaña Valientes en Turbo, escribe un briefing semanal corto (máximo 150 palabras), en español, tono directo y profesional, sin inventar nada que no esté en los datos:
+
+- Personas registradas en la red: ${totalPersonas}
+- Ingresos confirmados: $${totalIngreso.toLocaleString('es-CO')}
+- Gastos confirmados: $${totalGasto.toLocaleString('es-CO')}
+- Temas reportados en territorio/comunicaciones: ${temasReportados}
+- Nombres sugeridos para fichar: ${nombresFichajes}
+- Últimas decisiones del comité:
+${actasResumen}
+
+Estructura el briefing en 3 partes cortas: qué avanzó, qué requiere atención, y una recomendación concreta para esta semana.`;
+
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt })
+    });
+    const data = await resp.json();
+
+    if(data.error){ mostrarToast('Error de IA: ' + data.error); return; }
+
+    document.getElementById('briefing-resultado').style.display = 'block';
+    document.getElementById('briefing-resultado').textContent = data.text;
+  } catch(err){
+    mostrarToast('Error generando el briefing: ' + err.message);
+  }
+
+  boton.disabled = false;
+  boton.textContent = 'Generar briefing';
+}
+
 async function cargarIntelligenceCenter(){
   // --- Red: avances ---
   const { data: personas, error: errPersonas } = await supabaseClient
@@ -2677,14 +2788,31 @@ async function cargarIntelligenceCenter(){
 
   // --- Últimas decisiones del comité (reutiliza actas_reuniones) ---
   const { data: actasData, error: errActas } = await supabaseClient
-    .from('actas_reuniones').select('fecha, tema, decisiones_tomadas').order('fecha', { ascending: false }).limit(4);
+    .from('actas_reuniones').select('*').order('fecha', { ascending: false }).limit(6);
   if(errActas){
     document.getElementById('ic-actas').innerHTML = `<span style="color:var(--red);">${errActas.message}</span>`;
   } else {
     document.getElementById('ic-actas').innerHTML = (actasData||[]).length
-      ? actasData.map(a=>`<div class="ic-item"><span>${a.tema} (${a.fecha})</span><span class="ic-val">${(a.decisiones_tomadas||'').slice(0,40)}${(a.decisiones_tomadas||'').length>40?'…':''}</span></div>`).join('')
+      ? actasData.map((a,i)=>`
+        <div class="ic-item" style="cursor:pointer;flex-direction:column;align-items:stretch;" onclick="toggleActaDetalle(${i})">
+          <div style="display:flex;justify-content:space-between;width:100%;">
+            <span>▸ ${a.tema} (${a.fecha})</span>
+            <span class="ic-val">${(a.decisiones_tomadas||'').slice(0,32)}${(a.decisiones_tomadas||'').length>32?'…':''}</span>
+          </div>
+          <div id="acta-detalle-${i}" style="display:none;margin-top:8px;padding:10px;background:var(--panel-2);border-radius:8px;font-size:12px;color:var(--text-dim);">
+            <div style="margin-bottom:4px;"><strong style="color:var(--text);">Decisiones:</strong> ${a.decisiones_tomadas||'—'}</div>
+            ${a.tareas_pendientes ? `<div style="margin-bottom:4px;"><strong style="color:var(--text);">Pendiente:</strong> ${a.tareas_pendientes}</div>` : ''}
+            ${a.asistentes ? `<div style="margin-bottom:4px;"><strong style="color:var(--text);">Asistentes:</strong> ${a.asistentes}</div>` : ''}
+            ${a.creado_por ? `<div><strong style="color:var(--text);">Redactó:</strong> ${a.creado_por}</div>` : ''}
+          </div>
+        </div>`).join('')
       : '<div style="color:var(--text-dim);">Aún no hay actas registradas.</div>';
   }
+}
+
+function toggleActaDetalle(i){
+  const el = document.getElementById('acta-detalle-'+i);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 function mostrarToast(msg){
