@@ -935,78 +935,53 @@
           <h1>Intelligence Center</h1>
           <div class="desc">Resumen transversal — lo más relevante de los 5 Centros, en un solo lugar.</div>
         </div>
-        <div class="status-pill">● Actualizado hoy</div>
+        <div class="status-pill" id="intelligence-status">● cargando...</div>
       </div>
 
       <div class="grid grid-3">
         <div class="card">
-          <h3>Avances y registros nuevos</h3>
-          <div class="ic-list">
-            <div class="ic-item"><span>Visitas registradas (7 días)</span><span class="ic-val">38</span></div>
-            <div class="ic-item"><span>Contactos nuevos en BD Main</span><span class="ic-val">61</span></div>
-            <div class="ic-item"><span>Zonas visitadas por primera vez</span><span class="ic-val">2</span></div>
-          </div>
+          <h3>Red — avances</h3>
+          <div class="ic-list" id="ic-red-avances"><div style="color:var(--text-dim);font-size:12px;">Cargando...</div></div>
         </div>
 
         <div class="card">
-          <h3>Zonas más impactadas</h3>
-          <div class="ic-list">
-            <div class="ic-item"><span class="mapa-tile verde" style="display:inline-block;padding:3px 10px;">El Bosque</span><span class="ic-val">+12 visitas</span></div>
-            <div class="ic-item"><span class="mapa-tile amarillo" style="display:inline-block;padding:3px 10px;">La Playa</span><span class="ic-val">+4 visitas</span></div>
-            <div class="ic-item"><span class="mapa-tile rojo" style="display:inline-block;padding:3px 10px;">Nuevo Oriente</span><span class="ic-val">sin visitas</span></div>
-          </div>
+          <h3>Zonas con más registros</h3>
+          <div class="ic-list" id="ic-zonas"><div style="color:var(--text-dim);font-size:12px;">Cargando...</div></div>
         </div>
 
         <div class="card">
-          <h3>Gastos que llaman la atención</h3>
-          <div class="ic-list">
-            <div class="ic-item"><span>Evento Logístico (>100)</span><span class="ic-val">$1.71M</span></div>
-            <div class="ic-item"><span>Impresión volantes</span><span class="ic-val">$420K</span></div>
-          </div>
-          <div class="hint" style="margin-top:10px;">Mayor categoría: <strong style="color:var(--gold)">Logística</strong></div>
+          <h3>Gasto por categoría</h3>
+          <div class="ic-list" id="ic-gastos"><div style="color:var(--text-dim);font-size:12px;">Cargando...</div></div>
         </div>
 
         <div class="card">
           <h3>Tendencias que marcaron</h3>
-          <div class="ic-list">
-            <div class="ic-item"><span>Precio de transporte público</span><span class="ic-val">5 menciones</span></div>
-            <div class="ic-item"><span>Brigada de salud</span><span class="ic-val">2 menciones</span></div>
-          </div>
+          <div class="ic-list" id="ic-tendencias"><div style="color:var(--text-dim);font-size:12px;">Cargando...</div></div>
         </div>
 
         <div class="card">
-          <h3>Impacto por red</h3>
-          <div class="ic-list">
-            <div class="ic-item"><span>Instagram</span><span class="ic-val">Mayor interacción</span></div>
-            <div class="ic-item"><span>Facebook</span><span class="ic-val">Mayor alcance</span></div>
-            <div class="ic-item"><span>X</span><span class="ic-val">Mayor viralidad</span></div>
-          </div>
-          <div class="hint" style="margin-top:10px;">Publicación más impactada: <strong>"Salida a El Bosque"</strong></div>
-        </div>
-
-        <div class="card">
-          <h3>Comentarios destacados</h3>
-          <div class="ic-list">
-            <div class="ic-item" style="color:var(--green);"><span>👍 "Por fin alguien que escucha"</span></div>
-            <div class="ic-item" style="color:var(--red);"><span>👎 "Otra promesa más sin cumplir"</span></div>
-          </div>
-        </div>
-
-        <div class="card" style="grid-column:span 2;">
-          <h3>Personas que más interactúan</h3>
-          <div class="ic-list">
-            <div class="ic-item"><span>Pedro Julio (líder, Nuevo Oriente)</span><span class="ic-val">14 interacciones</span></div>
-            <div class="ic-item"><span>María Restrepo (líder, El Bosque)</span><span class="ic-val">11 interacciones</span></div>
-            <div class="ic-item"><span>J. Palacio (líder)</span><span class="ic-val">9 interacciones</span></div>
-          </div>
+          <h3>Fichajes activos</h3>
+          <div class="ic-list" id="ic-fichajes"><div style="color:var(--text-dim);font-size:12px;">Cargando...</div></div>
         </div>
 
         <div class="card">
           <h3>Balance rápido</h3>
-          <div class="ic-list">
-            <div class="ic-item"><span>Balance actual</span><span class="ic-val" style="color:var(--gold);">$8.45M</span></div>
-            <div class="ic-item"><span>Fichajes activos</span><span class="ic-val">3</span></div>
-          </div>
+          <div class="ic-list" id="ic-balance"><div style="color:var(--text-dim);font-size:12px;">Cargando...</div></div>
+        </div>
+
+        <div class="card" style="grid-column:span 2;">
+          <h3>Personas con más abejas en su colmena</h3>
+          <div class="ic-list" id="ic-colmena"><div style="color:var(--text-dim);font-size:12px;">Cargando...</div></div>
+        </div>
+
+        <div class="card">
+          <h3>Impacto por red social</h3>
+          <div class="ic-list" style="color:var(--text-dim);font-size:12px;">Pendiente — requiere conectar monitoreo de redes (fase posterior, ver Centro de Comunicaciones)</div>
+        </div>
+
+        <div class="card">
+          <h3>Comentarios destacados</h3>
+          <div class="ic-list" style="color:var(--text-dim);font-size:12px;">Pendiente — requiere el mismo monitoreo de redes que Comunicaciones aún no tiene conectado</div>
         </div>
       </div>
     </div>
@@ -1021,6 +996,27 @@
 const SUPABASE_URL = 'https://bgfkqbjjempfugbiofrc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_OICfItH4SPx5Q7Z18G1xDg_DVbsIvTu';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ---------- Detectar si se abrió desde un link de invitación real (?ref=id) ----------
+let refIdDesdeURL = null;
+async function revisarLinkDeInvitacion(){
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if(!ref) return;
+
+  refIdDesdeURL = ref;
+  const { data: referidor } = await supabaseClient
+    .from('bd_main')
+    .select('nombre')
+    .eq('id', ref)
+    .maybeSingle();
+
+  document.getElementById('reg-referido').textContent = referidor ? referidor.nombre : 'un líder de la campaña';
+  document.getElementById('login-screen').classList.remove('show');
+  document.getElementById('hero').style.display = 'none';
+  document.getElementById('registro-screen').classList.add('show');
+}
+revisarLinkDeInvitacion();
 </script>
 <script>
 function mostrarLogin(){
@@ -1070,7 +1066,13 @@ function verFormularioRegistro(){
 }
 function volverDeRegistro(){
   document.getElementById('registro-screen').classList.remove('show');
-  document.getElementById('app-shell').classList.add('show');
+  if(refIdDesdeURL){
+    // Es un ciudadano que llegó por el link público — no le mostramos el panel interno
+    document.getElementById('hero').style.display = 'block';
+  } else {
+    // Vino desde el flujo de demo interno (Community Center)
+    document.getElementById('app-shell').classList.add('show');
+  }
   window.scrollTo(0,0);
 }
 
@@ -1093,12 +1095,17 @@ async function enviarRegistro(){
   btn.textContent = 'Guardando...';
 
   try {
-    // Buscar el id de quien invitó, para dejar la relación referido_por
-    const { data: referidor } = await supabaseClient
-      .from('bd_main')
-      .select('id')
-      .eq('nombre', nombreReferido)
-      .maybeSingle();
+    // Si llegó por un link real (?ref=id), ya tenemos el id exacto.
+    // Si no (flujo de demo interno), lo buscamos por nombre.
+    let referidoId = refIdDesdeURL;
+    if(!referidoId){
+      const { data: referidor } = await supabaseClient
+        .from('bd_main')
+        .select('id')
+        .eq('nombre', nombreReferido)
+        .maybeSingle();
+      referidoId = referidor ? referidor.id : null;
+    }
 
     const { error } = await supabaseClient.from('bd_main').insert({
       cedula,
@@ -1107,7 +1114,7 @@ async function enviarRegistro(){
       corregimiento_vereda: corregimiento,
       direccion_libre: direccion,
       lugar_votacion: lugarVotacion || null,
-      referido_por: referidor ? referidor.id : null,
+      referido_por: referidoId,
       consentimiento_datos: true,
       fecha_consentimiento: new Date().toISOString()
     });
@@ -1153,18 +1160,29 @@ function normalizarId(texto){
     .replace(/\s+/g,'-');
 }
 
-function generarLinkInvitacion(){
+async function generarLinkInvitacion(){
   const persona = document.getElementById('red-persona-select').value;
-  const id = normalizarId(persona);
-  const url = `pios.geniosintelligence.co/r/${id}`;
+
+  const { data: referidor, error } = await supabaseClient
+    .from('bd_main')
+    .select('id')
+    .eq('nombre', persona)
+    .maybeSingle();
+
+  if(error || !referidor){
+    mostrarToast('No se encontró a esa persona en BD MAIN todavía.');
+    return;
+  }
+
+  const url = `${window.location.origin}/?ref=${referidor.id}`;
   const box = document.getElementById('link-result');
   box.classList.add('show');
   box.innerHTML = `Link generado para <strong>${persona}</strong>:
     <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
-      <span id="link-url-text" style="font-family:'IBM Plex Mono',monospace;color:var(--accent);font-size:12px;">${url}</span>
+      <span id="link-url-text" style="font-family:'IBM Plex Mono',monospace;color:var(--accent);font-size:11.5px;word-break:break-all;">${url}</span>
       <button class="btn-ghost btn-sm" onclick="copiarLink('${url}')">Copiar</button>
     </div>
-    <div style="color:var(--text-dim);font-size:11px;margin-top:8px;">Cualquiera que se registre desde este link queda automáticamente marcado como referido de ${persona}. (Dominio de demostración — aún no está desplegado, no lo abras en el navegador.)</div>`;
+    <div style="color:var(--text-dim);font-size:11px;margin-top:8px;">Este link ya es real — al abrirse, muestra el formulario de registro directamente, y quien se registre queda vinculado a ${persona}.</div>`;
 }
 
 function copiarLink(url){
@@ -1188,6 +1206,7 @@ function abrirCentro(seccion){
   if(seccion === 'logistico'){ renderCatalogo(); cargarTiposEvento(); }
   if(seccion === 'financiero'){ cargarGastosPendientes(); cargarBalanceYCategorias(); }
   if(seccion === 'comunicaciones'){ cargarTendenciasDesdeSupabase(); }
+  if(seccion === 'intelligence'){ cargarIntelligenceCenter(); }
   window.scrollTo(0,0);
 }
 
@@ -1811,7 +1830,89 @@ async function reportarPercepcion(){
   }
 }
 
-function mostrarToast(msg){
+// ---------- INTELLIGENCE CENTER: resumen real combinando los Centros conectados ----------
+async function cargarIntelligenceCenter(){
+  // --- Red: avances ---
+  const { data: personas, error: errPersonas } = await supabaseClient
+    .from('bd_main')
+    .select('id, nombre, corregimiento_vereda, referido_por');
+
+  if(errPersonas){
+    document.getElementById('ic-red-avances').innerHTML = `<span style="color:var(--red);">${errPersonas.message}</span>`;
+  } else {
+    document.getElementById('ic-red-avances').innerHTML = `
+      <div class="ic-item"><span>Total en BD MAIN</span><span class="ic-val">${personas.length}</span></div>
+      <div class="ic-item"><span>Con al menos 1 abeja sumada</span><span class="ic-val">${new Set(personas.filter(p=>p.referido_por).map(p=>p.referido_por)).size}</span></div>`;
+
+    // Zonas con más registros
+    const porZona = {};
+    personas.forEach(p => { if(p.corregimiento_vereda) porZona[p.corregimiento_vereda] = (porZona[p.corregimiento_vereda]||0)+1; });
+    const zonasOrdenadas = Object.entries(porZona).sort((a,b)=>b[1]-a[1]).slice(0,4);
+    document.getElementById('ic-zonas').innerHTML = zonasOrdenadas.length
+      ? zonasOrdenadas.map(([z,c])=>`<div class="ic-item"><span>${z}</span><span class="ic-val">${c} personas</span></div>`).join('')
+      : '<div style="color:var(--text-dim);">Aún sin registros por zona.</div>';
+
+    // Personas con más abejas directas
+    const conteoReferidos = {};
+    personas.forEach(p => { if(p.referido_por) conteoReferidos[p.referido_por] = (conteoReferidos[p.referido_por]||0)+1; });
+    const porId = {}; personas.forEach(p => porId[p.id] = p.nombre);
+    const topColmena = Object.entries(conteoReferidos).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    document.getElementById('ic-colmena').innerHTML = topColmena.length
+      ? topColmena.map(([id,c])=>`<div class="ic-item"><span>${porId[id]||'—'}</span><span class="ic-val">${c} abejas</span></div>`).join('')
+      : '<div style="color:var(--text-dim);">Aún nadie ha sumado a otra persona.</div>';
+  }
+
+  // --- Gasto por categoría (reutiliza gastos_confirmados) ---
+  const { data: gastosConf, error: errGastos } = await supabaseClient.from('gastos_confirmados').select('monto, rubro');
+  if(errGastos){
+    document.getElementById('ic-gastos').innerHTML = `<span style="color:var(--red);">${errGastos.message}</span>`;
+  } else {
+    const sums = {};
+    (gastosConf||[]).forEach(g => sums[g.rubro] = (sums[g.rubro]||0) + Number(g.monto));
+    const ordenado = Object.entries(sums).sort((a,b)=>b[1]-a[1]);
+    document.getElementById('ic-gastos').innerHTML = ordenado.length
+      ? ordenado.map(([cat,m])=>`<div class="ic-item"><span>${categoriaLabel[cat]||cat}</span><span class="ic-val">$${m.toLocaleString('es-CO')}</span></div>`).join('')
+      : '<div style="color:var(--text-dim);">Aún no hay gastos confirmados.</div>';
+  }
+
+  // --- Tendencias (reutiliza reportes_percepcion) ---
+  const { data: reportes, error: errReportes } = await supabaseClient.from('reportes_percepcion').select('tema_extraido');
+  if(errReportes){
+    document.getElementById('ic-tendencias').innerHTML = `<span style="color:var(--red);">${errReportes.message}</span>`;
+  } else {
+    const conteoTemas = {};
+    (reportes||[]).forEach(r => conteoTemas[r.tema_extraido] = (conteoTemas[r.tema_extraido]||0)+1);
+    const topTemas = Object.entries(conteoTemas).sort((a,b)=>b[1]-a[1]).slice(0,4);
+    document.getElementById('ic-tendencias').innerHTML = topTemas.length
+      ? topTemas.map(([t,c])=>`<div class="ic-item"><span>${t}</span><span class="ic-val">${c} reportes</span></div>`).join('')
+      : '<div style="color:var(--text-dim);">Aún no hay reportes de percepción.</div>';
+  }
+
+  // --- Fichajes activos (reutiliza sugerencias_fichaje) ---
+  const { data: sugerencias, error: errSug } = await supabaseClient.from('sugerencias_fichaje').select('nombre_sugerido, categoria');
+  if(errSug){
+    document.getElementById('ic-fichajes').innerHTML = `<span style="color:var(--red);">${errSug.message}</span>`;
+  } else {
+    const conteoFich = {};
+    (sugerencias||[]).forEach(s => { const k = s.nombre_sugerido+'|'+s.categoria; conteoFich[k]=(conteoFich[k]||0)+1; });
+    const activos = Object.entries(conteoFich).filter(([,c])=>c>=UMBRAL_FICHAJE);
+    document.getElementById('ic-fichajes').innerHTML = activos.length
+      ? activos.map(([k,c])=>`<div class="ic-item"><span>${k.split('|')[0]}</span><span class="ic-val">${c} menciones</span></div>`).join('')
+      : '<div style="color:var(--text-dim);">Ninguno ha llegado al umbral aún.</div>';
+    document.getElementById('intelligence-status').textContent = `● ${activos.length} fichajes activos`;
+  }
+
+  // --- Balance rápido (reutiliza ingresos + gastos_confirmados) ---
+  const { data: ingresosData } = await supabaseClient.from('ingresos').select('monto').eq('estado','confirmado');
+  const totalIngresos = (ingresosData||[]).reduce((s,i)=>s+Number(i.monto),0);
+  const totalGastos = (gastosConf||[]).reduce((s,g)=>s+Number(g.monto),0);
+  const balance = totalIngresos - totalGastos;
+  document.getElementById('ic-balance').innerHTML = `
+    <div class="ic-item"><span>Balance actual</span><span class="ic-val" style="color:var(--gold);">$${balance.toLocaleString('es-CO')}</span></div>
+    <div class="ic-item"><span>Ingresos confirmados</span><span class="ic-val">$${totalIngresos.toLocaleString('es-CO')}</span></div>`;
+}
+
+
   const t = document.getElementById('toast');
   t.innerText = msg;
   t.classList.add('show');
