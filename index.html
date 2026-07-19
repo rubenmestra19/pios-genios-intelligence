@@ -759,6 +759,7 @@
           </div>
           <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <input type="file" id="sabana-excel-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="procesarSabanaExcel(this.files[0])">
+            <button class="btn-ghost btn-sm" onclick="descargarPlantillaBDMain()">Descargar plantilla</button>
             <button class="btn-ghost btn-sm" onclick="document.getElementById('sabana-excel-input').click()">Subir sábana Excel</button>
             <button class="btn-ghost btn-sm" onclick="descargarCopiaBDMain()">Generar copia para reunión</button>
           </div>
@@ -2035,6 +2036,18 @@ Si una columna del Excel no corresponde a ningún campo, no la incluyas. Si un c
   } catch(err){
     resultado.textContent = 'Error inesperado: ' + err.message;
   }
+}
+
+function descargarPlantillaBDMain(){
+  const ejemplo = [
+    { Nombre: 'Juan Pérez', Cedula: '12345678', Telefono: '3001234567', Corregimiento: 'Currulao', Direccion: 'Calle 10 #5-20' },
+    { Nombre: 'María Gómez', Cedula: '87654321', Telefono: '3009876543', Corregimiento: 'El Tres', Direccion: 'Barrio El Bosque' }
+  ];
+  const hoja = XLSX.utils.json_to_sheet(ejemplo);
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, 'Plantilla');
+  XLSX.writeFile(libro, 'plantilla_bd_main.xlsx');
+  mostrarToast('Plantilla descargada — usa este mismo formato, la primera fila siempre son los títulos.');
 }
 
 async function descargarCopiaBDMain(){
