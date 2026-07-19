@@ -1912,7 +1912,7 @@ async function cargarIntelligenceCenter(){
     <div class="ic-item"><span>Ingresos confirmados</span><span class="ic-val">$${totalIngresos.toLocaleString('es-CO')}</span></div>`;
 }
 
-
+function mostrarToast(msg){
   const t = document.getElementById('toast');
   t.innerText = msg;
   t.classList.add('show');
