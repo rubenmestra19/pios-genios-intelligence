@@ -729,7 +729,7 @@
         <div class="status-pill" id="politico-status">● cargando...</div>
       </div>
 
-      <div class="grid grid-2">
+      <div class="grid grid-3">
         <div class="card">
           <h3>Más solicitados por el equipo</h3>
           <div class="hint">Se activa cuando el mismo nombre se sugiere 3 veces o más</div>
@@ -760,6 +760,44 @@
           <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn-ghost btn-sm" onclick="mostrarToast('Subir sábana Excel — pendiente de construir (requiere procesar el archivo antes de insertar en BD MAIN).')">Subir sábana Excel</button>
             <button class="btn-ghost btn-sm" onclick="mostrarToast('Generando copia de BD MAIN para reunión/trabajo en equipo — se descarga como Excel, sin afectar la base original.')">Generar copia para reunión</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Equipo Político</h3>
+          <div class="hint">Quiénes forman el comité — no confundir con los líderes territoriales de BD Main</div>
+          <div id="equipo-politico-list"><div style="color:var(--text-dim);font-size:12.5px;">Cargando...</div></div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);">
+            <div class="hint" style="margin-bottom:8px;">Agregar miembro del comité</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <input type="text" id="ep-nombre" placeholder="Nombre" style="background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;">
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="ep-rol" placeholder="Rol (ej: Coordinador)" style="flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;">
+                <input type="tel" id="ep-telefono" placeholder="Teléfono" style="flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;">
+              </div>
+              <button class="btn-gold btn-sm" onclick="agregarMiembroEquipoPolitico()">Agregar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h3>Actas de Reuniones</h3>
+        <div class="hint">Cada acta queda guardada permanentemente — nunca se edita, solo se agregan nuevas. Esto alimenta Intelligence Center.</div>
+        <div id="actas-list"><div style="color:var(--text-dim);font-size:12.5px;">Cargando...</div></div>
+
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);">
+          <div class="hint" style="margin-bottom:8px;">Redactar acta nueva</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:8px;">
+              <input type="date" id="acta-fecha" style="background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;">
+              <input type="text" id="acta-tema" placeholder="Tema de la reunión" style="flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;">
+            </div>
+            <input type="text" id="acta-asistentes" placeholder="Asistentes (nombres separados por coma)" style="background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;">
+            <textarea id="acta-decisiones" placeholder="Decisiones tomadas" style="width:100%;min-height:60px;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;"></textarea>
+            <textarea id="acta-tareas" placeholder="Tareas pendientes (opcional)" style="width:100%;min-height:44px;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;"></textarea>
+            <input type="text" id="acta-creado-por" placeholder="Redactada por" style="background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;">
+            <button class="btn-gold btn-sm" onclick="guardarActa()">Guardar acta</button>
           </div>
         </div>
       </div>
@@ -915,9 +953,24 @@
             <button class="btn-gold" onclick="reportarYDespachar()">Enviar</button>
           </div>
 
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);">
+            <div class="hint" style="margin-bottom:8px;">Marcar salida de un bus (única forma de que un bus "salga")</div>
+            <div style="display:flex;gap:8px;">
+              <select id="desp-bus-select" style="flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 8px;font-size:12.5px;">
+                <option value="">Sin buses disponibles</option>
+              </select>
+              <button class="btn-gold btn-sm" onclick="marcarSalidaBusDesdeCentral()">Marcar salida</button>
+            </div>
+          </div>
+
           <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);">
             <div class="hint" style="margin-bottom:8px;">Reportes recientes</div>
             <div id="despacho-list"><div style="color:var(--text-dim);font-size:12.5px;">Cargando...</div></div>
+          </div>
+
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);">
+            <div class="hint" style="margin-bottom:8px;">Control de flota — lo único que puede hacer es liberar de vuelta al inventario</div>
+            <div id="control-flota-list"><div style="color:var(--text-dim);font-size:12.5px;">Cargando...</div></div>
           </div>
         </div>
 
@@ -1086,6 +1139,11 @@
         <div class="card">
           <h3>Balance rápido</h3>
           <div class="ic-list" id="ic-balance"><div style="color:var(--text-dim);font-size:12px;">Cargando...</div></div>
+        </div>
+
+        <div class="card" style="grid-column:span 2;">
+          <h3>Últimas decisiones del comité</h3>
+          <div class="ic-list" id="ic-actas"><div style="color:var(--text-dim);font-size:12px;">Cargando...</div></div>
         </div>
 
         <div class="card" style="grid-column:span 2;">
@@ -1372,7 +1430,7 @@ function abrirCentro(seccion){
   document.getElementById('centro-actual-label').innerHTML = nombres[seccion] + '<small>← Volver a todos los centros</small>';
   if(seccion === 'comunitario') volverAlMenuComunitario();
   if(seccion === 'logistico') volverAlMenuLogistico();
-  if(seccion === 'politico'){ cargarFichajesDesdeSupabase(); cargarStatsBDMain(); }
+  if(seccion === 'politico'){ cargarStatsBDMain(); cargarEquipoPolitico(); cargarActas(); }
   if(seccion === 'logistico'){ renderCatalogo(); cargarTiposEvento(); }
   if(seccion === 'financiero'){ cargarGastosPendientes(); cargarBalanceYCategorias(); }
   if(seccion === 'comunicaciones'){ cargarTendenciasDesdeSupabase(); }
@@ -1573,6 +1631,9 @@ function procesarVisita(){
 // ---------- POLITICO: fichaje real (Supabase) ----------
 const UMBRAL_FICHAJE = 3; // criterio del Método Genios — vive en código, nunca configurable desde la Capa Cliente
 
+let equipoPoliticoCache = [];
+const estadoGestionLabel = {pendiente:'Pendiente', en_gestion:'En gestión', logrado:'Logrado', descartado:'Descartado'};
+
 async function cargarFichajesDesdeSupabase(){
   const { data, error } = await supabaseClient
     .from('sugerencias_fichaje')
@@ -1601,14 +1662,48 @@ async function cargarFichajesDesdeSupabase(){
     return { nombre, categoria, menciones };
   }).sort((a,b) => b.menciones - a.menciones);
 
-  const activos = lista.filter(f => f.menciones >= UMBRAL_FICHAJE).length;
-  document.getElementById('politico-status').textContent = `● ${activos} activos`;
+  const activos = lista.filter(f => f.menciones >= UMBRAL_FICHAJE);
+  document.getElementById('politico-status').textContent = `● ${activos.length} activos`;
+
+  // Traer los fichajes ya activados que tengan seguimiento (asignado_a, estado_gestion)
+  const { data: activadosData } = await supabaseClient
+    .from('fichajes_activados')
+    .select('id, nombre_sugerido, categoria, asignado_a, estado_gestion, equipo_politico(nombre)');
+
+  // Find-or-create: cualquier fichaje que cruzó el umbral y no tenga fila propia, se crea ahora
+  for(const f of activos){
+    const yaExiste = (activadosData||[]).find(a => a.nombre_sugerido === f.nombre && a.categoria === f.categoria);
+    if(!yaExiste){
+      const { data: nuevo } = await supabaseClient.from('fichajes_activados')
+        .insert({ nombre_sugerido: f.nombre, categoria: f.categoria, numero_menciones: f.menciones })
+        .select().maybeSingle();
+      if(nuevo) (activadosData||[]).push(nuevo);
+    }
+  }
 
   document.getElementById('fichaje-list').innerHTML = lista.map(f=>{
     const activo = f.menciones >= UMBRAL_FICHAJE;
     const pct = Math.min(100, (f.menciones/UMBRAL_FICHAJE)*100);
+    const registro = (activadosData||[]).find(a => a.nombre_sugerido === f.nombre && a.categoria === f.categoria);
+
+    let seguimiento = '';
+    if(activo && registro){
+      const opcionesEquipo = equipoPoliticoCache.map(m =>
+        `<option value="${m.id}" ${registro.asignado_a===m.id?'selected':''}>${m.nombre}</option>`).join('');
+      seguimiento = `
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);display:flex;gap:6px;flex-wrap:wrap;">
+        <select onchange="asignarResponsableFichaje('${registro.id}', this.value)" style="flex:1;min-width:110px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:11px;padding:4px 6px;">
+          <option value="">Sin asignar</option>
+          ${opcionesEquipo}
+        </select>
+        <select onchange="cambiarEstadoGestion('${registro.id}', this.value)" style="background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:11px;padding:4px 6px;">
+          ${Object.entries(estadoGestionLabel).map(([k,l])=>`<option value="${k}" ${registro.estado_gestion===k?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>`;
+    }
+
     return `
-    <div class="fichaje-row">
+    <div class="fichaje-row" style="flex-wrap:wrap;">
       <div class="ring" style="background:conic-gradient(${activo?'var(--gold)':'var(--teal)'} ${pct}%, var(--panel-3) 0); ">
         <div style="background:var(--panel-2);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${f.menciones}</div>
       </div>
@@ -1617,8 +1712,113 @@ async function cargarFichajesDesdeSupabase(){
         <div class="c">${f.categoria}</div>
       </div>
       <div class="fichaje-status ${activo?'activo':'pendiente'}">${activo?'Activado → Empresa':'Acumulando'}</div>
+      ${seguimiento}
     </div>`;
   }).join('');
+}
+
+async function asignarResponsableFichaje(id, personaId){
+  const { error } = await supabaseClient.from('fichajes_activados')
+    .update({ asignado_a: personaId || null, fecha_asignacion: personaId ? new Date().toISOString() : null })
+    .eq('id', id);
+  if(error){ mostrarToast('No se pudo asignar: ' + error.message); return; }
+  mostrarToast('Responsable asignado.');
+  cargarFichajesDesdeSupabase();
+}
+
+async function cambiarEstadoGestion(id, estado){
+  const { error } = await supabaseClient.from('fichajes_activados').update({ estado_gestion: estado }).eq('id', id);
+  if(error){ mostrarToast('No se pudo actualizar: ' + error.message); }
+}
+
+async function cargarEquipoPolitico(){
+  const { data, error } = await supabaseClient
+    .from('equipo_politico')
+    .select('id, nombre, telefono, rol, area_responsabilidad')
+    .order('fecha_creado', { ascending: false });
+
+  if(error){
+    document.getElementById('equipo-politico-list').innerHTML = `<span style="color:var(--red);font-size:12.5px;">${error.message}</span>`;
+    return;
+  }
+
+  equipoPoliticoCache = data || [];
+
+  document.getElementById('equipo-politico-list').innerHTML = equipoPoliticoCache.map(m => `
+    <div class="gasto-row">
+      <div class="gasto-info">
+        <div class="g-name">${m.nombre} ${m.rol ? '— '+m.rol : ''}</div>
+        <div class="g-origin">${m.area_responsabilidad || ''} ${m.telefono ? '· 📞 '+m.telefono : ''}</div>
+      </div>
+    </div>`).join('') || '<div style="color:var(--text-dim);font-size:12.5px;">Aún no hay miembros del comité registrados.</div>';
+
+  // Refresca el listado de fichajes para que el desplegable de asignación tenga los nombres actualizados
+  cargarFichajesDesdeSupabase();
+}
+
+async function agregarMiembroEquipoPolitico(){
+  const nombre = document.getElementById('ep-nombre').value.trim();
+  const rol = document.getElementById('ep-rol').value.trim();
+  const telefono = document.getElementById('ep-telefono').value.trim();
+  if(!nombre){ mostrarToast('Escribe un nombre.'); return; }
+
+  const { error } = await supabaseClient.from('equipo_politico').insert({ nombre, rol, telefono });
+  if(error){ mostrarToast('No se pudo guardar: ' + error.message); return; }
+
+  mostrarToast('Miembro agregado al comité.');
+  document.getElementById('ep-nombre').value = '';
+  document.getElementById('ep-rol').value = '';
+  document.getElementById('ep-telefono').value = '';
+  cargarEquipoPolitico();
+}
+
+async function cargarActas(){
+  const { data, error } = await supabaseClient
+    .from('actas_reuniones')
+    .select('*')
+    .order('fecha', { ascending: false })
+    .limit(15);
+
+  if(error){
+    document.getElementById('actas-list').innerHTML = `<span style="color:var(--red);font-size:12.5px;">${error.message}</span>`;
+    return;
+  }
+
+  document.getElementById('actas-list').innerHTML = (data||[]).map(a => `
+    <div class="gasto-row" style="align-items:flex-start;">
+      <div class="gasto-info">
+        <div class="g-name">${a.tema} — ${a.fecha}</div>
+        <div class="g-origin">${a.decisiones_tomadas}</div>
+        ${a.tareas_pendientes ? `<div class="g-origin" style="margin-top:3px;">Pendiente: ${a.tareas_pendientes}</div>` : ''}
+        <div class="g-origin" style="margin-top:3px;color:var(--text-dim);">${a.asistentes ? 'Asistentes: '+a.asistentes+' · ' : ''}${a.creado_por ? 'Redactó: '+a.creado_por : ''}</div>
+      </div>
+    </div>`).join('') || '<div style="color:var(--text-dim);font-size:12.5px;">Aún no hay actas registradas.</div>';
+}
+
+async function guardarActa(){
+  const fecha = document.getElementById('acta-fecha').value;
+  const tema = document.getElementById('acta-tema').value.trim();
+  const asistentes = document.getElementById('acta-asistentes').value.trim();
+  const decisiones = document.getElementById('acta-decisiones').value.trim();
+  const tareas = document.getElementById('acta-tareas').value.trim();
+  const creadoPor = document.getElementById('acta-creado-por').value.trim();
+
+  if(!fecha || !tema || !decisiones){
+    mostrarToast('Completa al menos fecha, tema y decisiones tomadas.');
+    return;
+  }
+
+  const { error } = await supabaseClient.from('actas_reuniones').insert({
+    fecha, tema, asistentes, decisiones_tomadas: decisiones, tareas_pendientes: tareas, creado_por: creadoPor
+  });
+
+  if(error){ mostrarToast('No se pudo guardar: ' + error.message); return; }
+
+  mostrarToast('Acta guardada.');
+  ['acta-tema','acta-asistentes','acta-decisiones','acta-tareas','acta-creado-por'].forEach(id=>{
+    document.getElementById(id).value = '';
+  });
+  cargarActas();
 }
 
 async function sugerirFichaje(){
@@ -1698,6 +1898,7 @@ async function cargarVehiculos(){
   vehiculosCache = data || [];
   renderTablero(vehiculosCache);
   renderListaVehiculos(vehiculosCache);
+  renderControlFlota(vehiculosCache);
   poblarSelectorDespacho(); // refresca el selector según el tipo ya elegido (o el mensaje de "elige primero")
 }
 
@@ -1727,25 +1928,18 @@ function renderTablero(data){
 
 function renderListaVehiculos(data){
   document.getElementById('vehiculos-list').innerHTML = data.map(v => {
-    let botones = '';
     let detalle = '';
+    let estadoTexto = '';
 
     if(v.tipo === 'mototaxi'){
-      detalle = `${v.motivo_despacho ? 'Despachado: '+v.motivo_despacho : 'Disponible'}`;
-      // El despacho solo se hace desde Central de Despacho — aquí solo se puede recibir el regreso
-      botones = v.estado === 'despachado'
-        ? `<button class="btn-approve btn-sm" onclick="regresarMoto('${v.id}')">Marcar regreso</button>`
-        : `<span style="color:var(--green);font-size:11px;">● Disponible en Central</span>`;
+      detalle = v.motivo_despacho ? 'Despachado: '+v.motivo_despacho : '';
+      estadoTexto = v.estado === 'despachado' ? '🟡 Despachado' : '🟢 Disponible';
     } else if(v.tipo === 'bus'){
       detalle = `${v.origen_o_ruta||'?'} → ${v.destino||'?'}`;
-      botones = v.estado === 'en_ruta'
-        ? `<button class="btn-approve btn-sm" onclick="marcarLlegadaBus('${v.id}')">Marcar llegada</button>`
-        : `<button class="btn-gold btn-sm" onclick="marcarSalidaBus('${v.id}')">Marcar salida</button>`;
+      estadoTexto = v.estado === 'en_ruta' ? '🟡 En ruta' : '🟢 Disponible';
     } else { // buseta
       detalle = v.ruta_paradas ? v.ruta_paradas.slice(0,50)+'…' : 'sin ruta definida';
-      botones = v.estado === 'en_ruta'
-        ? `<button class="btn-approve btn-sm" onclick="terminarRutaBuseta('${v.id}')">Terminó ruta</button>`
-        : `<button class="btn-gold btn-sm" onclick="iniciarRutaBuseta('${v.id}')">Salió a ruta</button>`;
+      estadoTexto = v.estado === 'en_ruta' ? '🟡 En ruta' : '🟢 Disponible';
     }
 
     return `
@@ -1754,9 +1948,38 @@ function renderListaVehiculos(data){
         <div class="g-name">${tipoVehiculoLabel[v.tipo]} ${v.identificador} — ${v.nombre_responsable||'sin nombre'}</div>
         <div class="g-origin">${detalle} ${v.telefono_responsable ? '· 📞 '+v.telefono_responsable : ''}</div>
       </div>
-      <div class="gasto-actions">${botones}</div>
+      <div class="gasto-actions"><span style="font-size:11px;color:var(--text-dim);">${estadoTexto}</span></div>
     </div>`;
   }).join('') || '<div style="color:var(--text-dim);font-size:12.5px;">Aún no hay recursos registrados.</div>';
+}
+
+// Único lugar con poder de cambiar estados — Central de Despacho
+function renderControlFlota(data){
+  // Solo aparecen recursos que YA están afuera (asignados desde arriba).
+  // La única acción posible aquí es liberarlos de vuelta al inventario.
+  const filas = data.map(v => {
+    const estaAfuera = (v.tipo === 'mototaxi' && v.estado === 'despachado')
+      || (v.tipo === 'bus' && v.estado === 'en_ruta')
+      || (v.tipo === 'buseta' && v.estado === 'en_ruta');
+
+    if(!estaAfuera) return '';
+
+    let accion = '';
+    if(v.tipo === 'mototaxi') accion = `<button class="btn-approve btn-sm" onclick="regresarMoto('${v.id}')">Marcar regreso</button>`;
+    else if(v.tipo === 'bus') accion = `<button class="btn-approve btn-sm" onclick="marcarLlegadaBus('${v.id}')">Marcar regreso</button>`;
+    else accion = `<button class="btn-approve btn-sm" onclick="terminarRutaBuseta('${v.id}')">Marcar regreso</button>`;
+
+    return `
+    <div class="gasto-row">
+      <div class="gasto-info">
+        <div class="g-name">${tipoVehiculoLabel[v.tipo]} — ${v.nombre_responsable||v.identificador}</div>
+        <div class="g-origin">${v.motivo_despacho ? v.motivo_despacho+' · ' : ''}${v.telefono_responsable ? '📞 '+v.telefono_responsable : ''} · ${tiempoTranscurrido(v.hora_salida_real)}</div>
+      </div>
+      <div class="gasto-actions">${accion}</div>
+    </div>`;
+  }).filter(Boolean).join('');
+
+  document.getElementById('control-flota-list').innerHTML = filas || '<div style="color:var(--text-dim);font-size:12.5px;">Nada en movimiento ahora mismo.</div>';
 }
 
 let guardandoVehiculo = false; // evita doble clic / doble toque en móvil
@@ -1927,21 +2150,35 @@ function poblarSelectorDespacho(){
   const select = document.getElementById('desp-vehiculo-select');
   if(!tipoReporteSeleccionado){
     select.innerHTML = '<option value="">Elige primero Persona o Grupo</option>';
-    return;
-  }
-  if(tipoReporteSeleccionado === 'persona'){
+  } else if(tipoReporteSeleccionado === 'persona'){
     // Persona sola → mototaxi disponible
     const motos = vehiculosCache.filter(v => v.tipo === 'mototaxi' && v.estado === 'disponible');
     select.innerHTML = '<option value="">Sin asignar aún</option>' +
       motos.map(v => `<option value="${v.id}">${v.nombre_responsable || v.identificador} (moto)</option>`).join('');
     if(motos.length === 0) select.innerHTML = '<option value="">No hay mototaxis disponibles</option>';
   } else {
-    // Grupo → asumimos que necesita buseta rural, no moto individual
-    const busetas = vehiculosCache.filter(v => v.tipo === 'buseta');
+    // Grupo → buseta disponible (que no esté ya en ruta)
+    const busetas = vehiculosCache.filter(v => v.tipo === 'buseta' && v.estado === 'disponible');
     select.innerHTML = '<option value="">Sin asignar aún</option>' +
-      busetas.map(v => `<option value="${v.id}">${v.nombre_responsable || v.identificador} (buseta)${v.estado==='en_ruta'?' — en ruta':''}</option>`).join('');
-    if(busetas.length === 0) select.innerHTML = '<option value="">No hay busetas registradas</option>';
+      busetas.map(v => `<option value="${v.id}">${v.nombre_responsable || v.identificador} (buseta)</option>`).join('');
+    if(busetas.length === 0) select.innerHTML = '<option value="">No hay busetas disponibles</option>';
   }
+
+  // Selector de buses, siempre visible aparte, solo los disponibles (no en ruta)
+  const selectBus = document.getElementById('desp-bus-select');
+  if(selectBus){
+    const buses = vehiculosCache.filter(v => v.tipo === 'bus' && v.estado === 'disponible');
+    selectBus.innerHTML = buses.length
+      ? buses.map(v => `<option value="${v.id}">${v.nombre_responsable || v.identificador} — ${v.origen_o_ruta||'?'} → ${v.destino||'?'}</option>`).join('')
+      : '<option value="">Sin buses disponibles</option>';
+  }
+}
+
+async function marcarSalidaBusDesdeCentral(){
+  const id = document.getElementById('desp-bus-select').value;
+  if(!id){ mostrarToast('No hay ningún bus disponible para marcar salida.'); return; }
+  await marcarSalidaBus(id);
+  mostrarToast('Salida de bus registrada.');
 }
 
 async function cargarDespacho(){
@@ -1985,8 +2222,7 @@ async function reportarYDespachar(){
 
   if(error){ mostrarToast('No se pudo guardar: ' + error.message); return; }
 
-  // Si se seleccionó un mototaxi, se despacha de una vez — un solo toque, no dos pasos
-  // Si es una buseta, solo queda referenciada (no se despacha, ya está en su ruta o la tomará)
+  // Si se seleccionó un mototaxi o una buseta, se despacha de una vez — sale del inventario disponible
   let mensajeFinal = 'Reporte enviado.';
   if(vehiculoId){
     const veh = vehiculosCache.find(v => v.id === vehiculoId);
@@ -1994,11 +2230,14 @@ async function reportarYDespachar(){
       await supabaseClient.from('vehiculos_transporte')
         .update({ estado: 'despachado', motivo_despacho: textoReporte, hora_salida_real: new Date().toISOString() })
         .eq('id', vehiculoId);
-      cargarVehiculos();
       mensajeFinal = 'Reporte enviado y mototaxi despachado.';
     } else if(veh && veh.tipo === 'buseta'){
-      mensajeFinal = `Reporte enviado — avísale a ${veh.nombre_responsable||'la buseta'} por teléfono.`;
+      await supabaseClient.from('vehiculos_transporte')
+        .update({ estado: 'en_ruta', motivo_despacho: textoReporte, hora_salida_real: new Date().toISOString() })
+        .eq('id', vehiculoId);
+      mensajeFinal = `Reporte enviado y buseta en camino — avísale a ${veh.nombre_responsable||'la buseta'} por teléfono.`;
     }
+    cargarVehiculos();
   }
 
   mostrarToast(mensajeFinal);
@@ -2435,6 +2674,17 @@ async function cargarIntelligenceCenter(){
   document.getElementById('ic-balance').innerHTML = `
     <div class="ic-item"><span>Balance actual</span><span class="ic-val" style="color:var(--gold);">$${balance.toLocaleString('es-CO')}</span></div>
     <div class="ic-item"><span>Ingresos confirmados</span><span class="ic-val">$${totalIngresos.toLocaleString('es-CO')}</span></div>`;
+
+  // --- Últimas decisiones del comité (reutiliza actas_reuniones) ---
+  const { data: actasData, error: errActas } = await supabaseClient
+    .from('actas_reuniones').select('fecha, tema, decisiones_tomadas').order('fecha', { ascending: false }).limit(4);
+  if(errActas){
+    document.getElementById('ic-actas').innerHTML = `<span style="color:var(--red);">${errActas.message}</span>`;
+  } else {
+    document.getElementById('ic-actas').innerHTML = (actasData||[]).length
+      ? actasData.map(a=>`<div class="ic-item"><span>${a.tema} (${a.fecha})</span><span class="ic-val">${(a.decisiones_tomadas||'').slice(0,40)}${(a.decisiones_tomadas||'').length>40?'…':''}</span></div>`).join('')
+      : '<div style="color:var(--text-dim);">Aún no hay actas registradas.</div>';
+  }
 }
 
 function mostrarToast(msg){
