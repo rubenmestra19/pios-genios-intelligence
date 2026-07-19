@@ -274,6 +274,8 @@
   .login-foot a:hover{text-decoration:underline;}
 
   #registro-screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:var(--ink);padding:24px;}
+  #mi-link-screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:var(--ink);padding:24px;text-align:center;}
+  #mi-link-screen.show{display:flex;}
   #registro-screen.show{display:flex;}
   .reg-box{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;text-align:center;}
   .reg-banner{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--text-dim);margin-bottom:26px;}
@@ -540,6 +542,19 @@
   </div>
 </div>
 
+<div id="mi-link-screen">
+  <div class="reg-box">
+    <div style="font-size:40px;margin-bottom:10px;">🐝</div>
+    <div class="login-word" style="font-size:24px;">¡Ya eres parte de la red!</div>
+    <div class="login-by" style="margin-bottom:20px;">Este es tu link personal — compártelo por WhatsApp con quien quieras que se sume</div>
+    <div class="login-box" style="max-width:420px;">
+      <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:14px 16px;word-break:break-all;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--accent);" id="mi-link-texto"></div>
+      <button class="btn-gold" onclick="copiarMiLink()">Copiar mi link</button>
+    </div>
+    <div class="login-foot" style="margin-top:24px;"><a onclick="cerrarPantallaMiLink()">Listo, continuar →</a></div>
+  </div>
+</div>
+
 <div class="app-shell" id="app-shell">
 <div class="app">
 
@@ -670,7 +685,7 @@
             <div class="hint" style="margin-bottom:8px;">Genera tu link para compartir por WhatsApp</div>
             <div style="display:flex;gap:8px;">
               <select id="red-persona-select" style="flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;">
-                <option>J. Palacio</option><option>María Restrepo</option><option>Pedro Julio</option>
+                <option value="">Cargando personas...</option>
               </select>
               <button class="btn-ghost btn-sm" onclick="generarLinkInvitacion()">Generar link</button>
             </div>
@@ -999,12 +1014,14 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ---------- Detectar si se abrió desde un link de invitación real (?ref=id) ----------
 let refIdDesdeURL = null;
+let esRegistroPublico = false; // true solo si llegó por un link real, no por la demo interna
 async function revisarLinkDeInvitacion(){
   const params = new URLSearchParams(window.location.search);
   const ref = params.get('ref');
   if(!ref) return;
 
   refIdDesdeURL = ref;
+  esRegistroPublico = true;
   const { data: referidor } = await supabaseClient
     .from('bd_main')
     .select('nombre')
@@ -1058,15 +1075,45 @@ function volverAlMenuLogistico(){
 }
 
 function verFormularioRegistro(){
-  const persona = document.getElementById('red-persona-select').value;
-  document.getElementById('reg-referido').textContent = persona;
+  const select = document.getElementById('red-persona-select');
+  const id = select.value;
+  const nombre = select.options[select.selectedIndex]?.text;
+  if(!id){ mostrarToast('No hay nadie seleccionado todavía.'); return; }
+  refIdDesdeURL = id; // simula venir del link real de esta persona
+  document.getElementById('reg-referido').textContent = nombre;
   document.getElementById('app-shell').classList.remove('show');
   document.getElementById('registro-screen').classList.add('show');
   window.scrollTo(0,0);
 }
+function mostrarMiLinkPersonal(miId){
+  const url = `${window.location.origin}/?ref=${miId}`;
+  document.getElementById('mi-link-texto').textContent = url;
+  window._miLinkURL = url;
+  document.getElementById('registro-screen').classList.remove('show');
+  document.getElementById('mi-link-screen').classList.add('show');
+}
+
+function copiarMiLink(){
+  navigator.clipboard.writeText(window._miLinkURL).then(()=>{
+    mostrarToast('Link copiado — ya lo puedes pegar en WhatsApp.');
+  }).catch(()=>{
+    mostrarToast('No se pudo copiar automáticamente — selecciona el texto manualmente.');
+  });
+}
+
+function cerrarPantallaMiLink(){
+  document.getElementById('mi-link-screen').classList.remove('show');
+  if(esRegistroPublico){
+    document.getElementById('hero').style.display = 'block';
+  } else {
+    document.getElementById('app-shell').classList.add('show');
+  }
+  window.scrollTo(0,0);
+}
+
 function volverDeRegistro(){
   document.getElementById('registro-screen').classList.remove('show');
-  if(refIdDesdeURL){
+  if(esRegistroPublico){
     // Es un ciudadano que llegó por el link público — no le mostramos el panel interno
     document.getElementById('hero').style.display = 'block';
   } else {
@@ -1107,7 +1154,7 @@ async function enviarRegistro(){
       referidoId = referidor ? referidor.id : null;
     }
 
-    const { error } = await supabaseClient.from('bd_main').insert({
+    const { data: nuevoRegistro, error } = await supabaseClient.from('bd_main').insert({
       cedula,
       nombre,
       telefono,
@@ -1117,7 +1164,7 @@ async function enviarRegistro(){
       referido_por: referidoId,
       consentimiento_datos: true,
       fecha_consentimiento: new Date().toISOString()
-    });
+    }).select().single();
 
     if(error){
       if(error.code === '23505'){
@@ -1130,8 +1177,7 @@ async function enviarRegistro(){
         mostrarToast('No se pudo guardar: ' + error.message);
       }
     } else {
-      mostrarToast('¡Registro exitoso! Quedaste vinculado en la red de ' + nombreReferido + '.');
-      volverDeRegistro();
+      mostrarMiLinkPersonal(nuevoRegistro.id);
       cargarColmenaDesdeSupabase();
     }
   } catch(err){
@@ -1160,21 +1206,17 @@ function normalizarId(texto){
     .replace(/\s+/g,'-');
 }
 
-async function generarLinkInvitacion(){
-  const persona = document.getElementById('red-persona-select').value;
+function generarLinkInvitacion(){
+  const select = document.getElementById('red-persona-select');
+  const id = select.value;
+  const persona = select.options[select.selectedIndex]?.text;
 
-  const { data: referidor, error } = await supabaseClient
-    .from('bd_main')
-    .select('id')
-    .eq('nombre', persona)
-    .maybeSingle();
-
-  if(error || !referidor){
-    mostrarToast('No se encontró a esa persona en BD MAIN todavía.');
+  if(!id){
+    mostrarToast('No hay nadie seleccionado todavía.');
     return;
   }
 
-  const url = `${window.location.origin}/?ref=${referidor.id}`;
+  const url = `${window.location.origin}/?ref=${id}`;
   const box = document.getElementById('link-result');
   box.classList.add('show');
   box.innerHTML = `Link generado para <strong>${persona}</strong>:
@@ -1289,8 +1331,13 @@ async function cargarColmenaDesdeSupabase(){
   if(!data || data.length === 0){
     document.getElementById('red-tree').innerHTML = `<div style="color:var(--text-dim);font-size:12.5px;">Aún no hay nadie registrado. Genera un link de invitación para empezar la Colmena.</div>`;
     document.getElementById('red-mapa-svg').innerHTML = '';
+    document.getElementById('red-persona-select').innerHTML = '<option value="">Nadie registrado aún</option>';
     return;
   }
+
+  // Poblar el selector "Generar tu link" con personas reales, no una lista fija
+  document.getElementById('red-persona-select').innerHTML = data
+    .map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
   // Construir árbol a partir de filas planas (id / referido_por)
   const porId = {};
