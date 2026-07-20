@@ -2126,14 +2126,56 @@ async function descargarPlantillaBDMain(){
 
 async function descargarCopiaBDMain(){
   mostrarToast('Generando copia de BD MAIN...');
-  const { data, error } = await supabaseClient.from('bd_main').select('cedula, nombre, telefono, corregimiento_vereda, direccion_libre, lugar_votacion');
+  const nombreCampana = (document.getElementById('plantilla-campana-input').value.trim() || 'Valientes - Turbo');
+
+  const { data, error } = await supabaseClient
+    .from('bd_main')
+    .select('nombre, cedula, telefono, direccion_libre, corregimiento_vereda, lugar_votacion, edad, profesion')
+    .order('nombre');
+
   if(error){ mostrarToast('No se pudo generar: ' + error.message); return; }
   if(!data || data.length === 0){ mostrarToast('BD MAIN está vacía todavía.'); return; }
 
-  const hoja = XLSX.utils.json_to_sheet(data);
-  const libro = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(libro, hoja, 'BD MAIN');
-  XLSX.writeFile(libro, `bd_main_${new Date().toISOString().slice(0,10)}.xlsx`);
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('BD MAIN');
+
+  ws.mergeCells('A1:H1');
+  const titulo = ws.getCell('A1');
+  titulo.value = `GENIOS INTELLIGENCE — COPIA BD MAIN — ${nombreCampana.toUpperCase()} — ${new Date().toLocaleDateString('es-CO')}`;
+  titulo.font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+  titulo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0A2540' } };
+  titulo.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(1).height = 28;
+
+  const headers = ['NOMBRE','CEDULA','TELEFONO','DIRECCION','VEREDA','LUGAR DE VOTACION','EDAD','PROFESION'];
+  const filaEncabezado = ws.getRow(3);
+  headers.forEach((h,i) => {
+    const celda = filaEncabezado.getCell(i+1);
+    celda.value = h;
+    celda.font = { bold: true, color: { argb: 'FF1A1200' } };
+    celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC9A227' } };
+    celda.alignment = { horizontal: 'center' };
+  });
+  filaEncabezado.height = 20;
+
+  data.forEach((persona, i) => {
+    const row = ws.getRow(4+i);
+    [persona.nombre, persona.cedula, persona.telefono, persona.direccion_libre, persona.corregimiento_vereda, persona.lugar_votacion, persona.edad, persona.profesion]
+      .forEach((val,j) => row.getCell(j+1).value = val ?? '');
+  });
+
+  ws.columns = [
+    { width: 22 },{ width: 14 },{ width: 15 },{ width: 26 },{ width: 16 },{ width: 22 },{ width: 8 },{ width: 16 }
+  ];
+
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bd_main_${nombreCampana.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
   mostrarToast('Descarga lista — revisa tu carpeta de descargas.');
 }
 
