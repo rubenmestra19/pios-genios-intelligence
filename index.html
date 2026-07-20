@@ -757,11 +757,14 @@
             Registros totales: <strong style="color:var(--gold)">...</strong><br>
             Duplicados descartados: <strong>...</strong>
           </div>
-          <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <input type="file" id="sabana-excel-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="procesarSabanaExcel(this.files[0])">
-            <button class="btn-ghost btn-sm" onclick="descargarPlantillaBDMain()">Descargar plantilla</button>
-            <button class="btn-ghost btn-sm" onclick="document.getElementById('sabana-excel-input').click()">Subir sábana Excel</button>
-            <button class="btn-ghost btn-sm" onclick="descargarCopiaBDMain()">Generar copia para reunión</button>
+          <div style="margin-top:14px;">
+            <input type="text" id="plantilla-campana-input" placeholder="Nombre de campaña (ej: Valientes - Turbo)" style="width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:12.5px;margin-bottom:8px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <input type="file" id="sabana-excel-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="procesarSabanaExcel(this.files[0])">
+              <button class="btn-ghost btn-sm" onclick="descargarPlantillaBDMain()">Descargar plantilla</button>
+              <button class="btn-ghost btn-sm" onclick="document.getElementById('sabana-excel-input').click()">Subir sábana Excel</button>
+              <button class="btn-ghost btn-sm" onclick="descargarCopiaBDMain()">Generar copia para reunión</button>
+            </div>
           </div>
           <div id="sabana-resultado" style="display:none;margin-top:10px;padding:10px;background:var(--panel-2);border-radius:8px;font-size:12px;color:var(--text-dim);"></div>
         </div>
@@ -1179,6 +1182,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script>
 // ---------- Conexión real a Supabase ----------
 const SUPABASE_URL = 'https://bgfkqbjjempfugbiofrc.supabase.co';
@@ -1953,14 +1957,38 @@ async function procesarSabanaExcel(file){
     const buffer = await file.arrayBuffer();
     const libro = XLSX.read(buffer, { type: 'array' });
     const hoja = libro.Sheets[libro.SheetNames[0]];
-    const filas = XLSX.utils.sheet_to_json(hoja, { defval: '' });
+    const bruto = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '', blankrows: false });
 
-    if(filas.length === 0){
+    if(bruto.length === 0){
       resultado.textContent = 'El archivo está vacío o no se pudo leer.';
       return;
     }
 
-    const encabezados = Object.keys(filas[0]);
+    // Detectar en cuál fila están los títulos reales — así no importa si hay
+    // una fila de nombre de campaña arriba (como en la plantilla oficial).
+    // Una fila de título suele tener 1 sola celda larga; una fila de encabezados
+    // tiene varias celdas cortas.
+    let indiceEncabezado = 0;
+    for(let i = 0; i < Math.min(bruto.length, 10); i++){
+      const fila = bruto[i];
+      const noVacias = fila.filter(c => String(c).trim() !== '');
+      const algunaMuyLarga = noVacias.some(c => String(c).length > 40);
+      if(noVacias.length >= 3 && !algunaMuyLarga){ indiceEncabezado = i; break; }
+    }
+
+    const encabezados = bruto[indiceEncabezado].map(h => String(h).trim());
+    const filasDatos = bruto.slice(indiceEncabezado + 1).filter(f => f.some(c => String(c).trim() !== ''));
+    const filas = filasDatos.map(f => {
+      const obj = {};
+      encabezados.forEach((h,i) => { obj[h] = f[i] ?? ''; });
+      return obj;
+    });
+
+    if(filas.length === 0){
+      resultado.textContent = 'No se encontraron filas de datos debajo de los títulos.';
+      return;
+    }
+
     const muestra = filas.slice(0, 3);
 
     resultado.textContent = `Encontré ${filas.length} filas. Pidiéndole a la IA que identifique las columnas...`;
@@ -1969,10 +1997,10 @@ async function procesarSabanaExcel(file){
     const prompt = `Este Excel tiene estas columnas: ${JSON.stringify(encabezados)}
 Aquí hay 3 filas de ejemplo: ${JSON.stringify(muestra)}
 
-Responde ÚNICAMENTE con un JSON (sin texto adicional) que mapee cada columna de este Excel al campo correspondiente de nuestra base de datos. Los campos posibles son: cedula, nombre, telefono, corregimiento_vereda, direccion_libre, lugar_votacion.
+Responde ÚNICAMENTE con un JSON (sin texto adicional) que mapee cada columna de este Excel al campo correspondiente de nuestra base de datos. Los campos posibles son: cedula, nombre, telefono, corregimiento_vereda, direccion_libre, lugar_votacion, edad, profesion.
 
 Formato de respuesta exacto:
-{"cedula": "nombre_de_columna_del_excel_o_null", "nombre": "...", "telefono": "...", "corregimiento_vereda": "...", "direccion_libre": "...", "lugar_votacion": "..."}
+{"cedula": "nombre_de_columna_del_excel_o_null", "nombre": "...", "telefono": "...", "corregimiento_vereda": "...", "direccion_libre": "...", "lugar_votacion": "...", "edad": "...", "profesion": "..."}
 
 Si una columna del Excel no corresponde a ningún campo, no la incluyas. Si un campo no existe en el Excel, pon null.`;
 
@@ -1996,16 +2024,22 @@ Si una columna del Excel no corresponde a ningún campo, no la incluyas. Si un c
     resultado.textContent = `Columnas identificadas. Preparando ${filas.length} registros...`;
 
     // 3. Aplicar el mapa a TODAS las filas — esto ya no usa IA, es código normal y gratis
-    const registros = filas.map(fila => ({
-      cedula: mapa.cedula ? String(fila[mapa.cedula] ?? '').trim() : '',
-      nombre: mapa.nombre ? String(fila[mapa.nombre] ?? '').trim() : '',
-      telefono: mapa.telefono ? String(fila[mapa.telefono] ?? '').trim() : null,
-      corregimiento_vereda: mapa.corregimiento_vereda ? String(fila[mapa.corregimiento_vereda] ?? '').trim() : null,
-      direccion_libre: mapa.direccion_libre ? String(fila[mapa.direccion_libre] ?? '').trim() : null,
-      lugar_votacion: mapa.lugar_votacion ? String(fila[mapa.lugar_votacion] ?? '').trim() : null,
-      consentimiento_datos: true,
-      fecha_consentimiento: new Date().toISOString()
-    })).filter(r => r.cedula && r.nombre); // descartamos filas sin lo mínimo indispensable
+    const registros = filas.map(fila => {
+      const edadTexto = mapa.edad ? String(fila[mapa.edad] ?? '').trim() : '';
+      const edadNum = edadTexto ? parseInt(edadTexto) : null;
+      return {
+        cedula: mapa.cedula ? String(fila[mapa.cedula] ?? '').trim() : '',
+        nombre: mapa.nombre ? String(fila[mapa.nombre] ?? '').trim() : '',
+        telefono: mapa.telefono ? String(fila[mapa.telefono] ?? '').trim() : null,
+        corregimiento_vereda: mapa.corregimiento_vereda ? String(fila[mapa.corregimiento_vereda] ?? '').trim() : null,
+        direccion_libre: mapa.direccion_libre ? String(fila[mapa.direccion_libre] ?? '').trim() : null,
+        lugar_votacion: mapa.lugar_votacion ? String(fila[mapa.lugar_votacion] ?? '').trim() : null,
+        edad: (edadNum && !isNaN(edadNum)) ? edadNum : null,
+        profesion: mapa.profesion ? String(fila[mapa.profesion] ?? '').trim() : null,
+        consentimiento_datos: true,
+        fecha_consentimiento: new Date().toISOString()
+      };
+    }).filter(r => r.cedula && r.nombre); // descartamos filas sin lo mínimo indispensable
 
     const descartadas = filas.length - registros.length;
 
@@ -2038,16 +2072,56 @@ Si una columna del Excel no corresponde a ningún campo, no la incluyas. Si un c
   }
 }
 
-function descargarPlantillaBDMain(){
+async function descargarPlantillaBDMain(){
+  const nombreCampana = (document.getElementById('plantilla-campana-input').value.trim() || 'Valientes - Turbo');
+
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('BD MAIN');
+
+  // Fila 1: título de campaña, con estilo
+  ws.mergeCells('A1:H1');
+  const titulo = ws.getCell('A1');
+  titulo.value = `GENIOS INTELLIGENCE — PLANTILLA OFICIAL BD MAIN — ${nombreCampana.toUpperCase()}`;
+  titulo.font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+  titulo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0A2540' } };
+  titulo.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(1).height = 28;
+
+  // Fila 3: encabezados reales, en mayúscula, con color
+  const headers = ['NOMBRE','CEDULA','TELEFONO','DIRECCION','VEREDA','LUGAR DE VOTACION','EDAD','PROFESION'];
+  const filaEncabezado = ws.getRow(3);
+  headers.forEach((h,i) => {
+    const celda = filaEncabezado.getCell(i+1);
+    celda.value = h;
+    celda.font = { bold: true, color: { argb: 'FF1A1200' } };
+    celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC9A227' } };
+    celda.alignment = { horizontal: 'center' };
+  });
+  filaEncabezado.height = 20;
+
+  // Filas 4+: ejemplo, para que quede claro el formato
   const ejemplo = [
-    { Nombre: 'Juan Pérez', Cedula: '12345678', Telefono: '3001234567', Corregimiento: 'Currulao', Direccion: 'Calle 10 #5-20' },
-    { Nombre: 'María Gómez', Cedula: '87654321', Telefono: '3009876543', Corregimiento: 'El Tres', Direccion: 'Barrio El Bosque' }
+    ['Juan Pérez','12345678','3001234567','Calle 10 #5-20','Currulao','Puesto Currulao Centro',34,'Agricultor'],
+    ['María Gómez','87654321','3009876543','Barrio El Bosque','El Tres','I.E. El Tres',29,'Comerciante']
   ];
-  const hoja = XLSX.utils.json_to_sheet(ejemplo);
-  const libro = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(libro, hoja, 'Plantilla');
-  XLSX.writeFile(libro, 'plantilla_bd_main.xlsx');
-  mostrarToast('Plantilla descargada — usa este mismo formato, la primera fila siempre son los títulos.');
+  ejemplo.forEach((fila,i) => {
+    const row = ws.getRow(4+i);
+    fila.forEach((val,j) => row.getCell(j+1).value = val);
+  });
+
+  ws.columns = [
+    { width: 22 },{ width: 14 },{ width: 15 },{ width: 26 },{ width: 16 },{ width: 22 },{ width: 8 },{ width: 16 }
+  ];
+
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `plantilla_bd_main_${nombreCampana.replace(/\s+/g,'_')}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
+  mostrarToast('Plantilla descargada.');
 }
 
 async function descargarCopiaBDMain(){
