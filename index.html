@@ -1437,11 +1437,6 @@ async function revisarLinkDeInvitacion(){
 
   document.getElementById('reg-referido').textContent = referidor ? referidor.nombre : 'un líder de la campaña';
 }
-
-(async () => {
-  const esEncuesta = await revisarLinkDeEncuesta();
-  if(!esEncuesta) revisarLinkDeInvitacion();
-})();
 </script>
 <script>
 function mostrarLogin(){
@@ -4137,6 +4132,11 @@ function mostrarToast(msg){
   clearTimeout(window._toastTimer);
   window._toastTimer = setTimeout(()=>t.classList.remove('show'), 4200);
 }
+
+(async () => {
+  const esEncuesta = await revisarLinkDeEncuesta();
+  if(!esEncuesta) revisarLinkDeInvitacion();
+})();
 </script>
 <div id="toast"></div>
 </body>
