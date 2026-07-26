@@ -560,41 +560,60 @@
 </div>
 
 <!-- Pantalla pública de aplicación de encuesta — sin login, sin panel de admin -->
-<div id="encuesta-publica-screen" style="display:none;min-height:100vh;background:var(--ink);padding:20px;">
-  <div style="max-width:480px;margin:0 auto;">
-    <div style="text-align:center;padding:20px 0;">
-      <div style="font-size:13px;color:var(--text-dim);letter-spacing:1px;">GENIOS INTELLIGENCE · SURVEY CENTER</div>
-      <div id="ep-nombre-estudio" style="font-size:20px;font-weight:700;color:var(--gold);margin-top:4px;">Cargando estudio...</div>
+<div id="encuesta-publica-screen" style="display:none;min-height:100vh;background:#f7f6f3;">
+
+  <!-- Barra superior corporativa -->
+  <div style="background:#0a2540;padding:22px 20px;text-align:center;">
+    <div style="font-family:Georgia,serif;font-size:19px;font-weight:700;color:#fff;letter-spacing:.3px;">GENIOS INTELLIGENCE</div>
+    <div style="font-size:10px;font-weight:600;color:#9fb4c9;letter-spacing:3px;margin-top:3px;">RESEARCH</div>
+  </div>
+
+  <div style="max-width:520px;margin:0 auto;padding:0 20px 40px 20px;">
+
+    <!-- Hero del estudio -->
+    <div style="text-align:center;padding:32px 12px 26px 12px;">
+      <div style="display:inline-block;padding:5px 16px;background:#fff;border:1px solid #e0ded6;border-radius:20px;font-size:10.5px;font-weight:600;color:#9c7a1f;letter-spacing:1px;margin-bottom:16px;">ESTUDIO DE PERCEPCIÓN CIUDADANA</div>
+      <div id="ep-nombre-estudio" style="font-family:Georgia,serif;font-size:25px;font-weight:700;color:#0a2540;line-height:1.25;">Cargando estudio...</div>
+      <div style="font-size:13px;color:#6b6b6b;margin-top:10px;line-height:1.5;">Su opinión es confidencial y aporta directamente al análisis de esta región.</div>
     </div>
 
-    <div id="ep-offline-indicator" style="display:none;margin-bottom:14px;padding:10px 12px;background:var(--panel-2);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;font-size:12px;">
+    <div id="ep-offline-indicator" style="display:none;margin-bottom:16px;padding:11px 14px;background:#fff;border-left:3px solid #9c7a1f;border-radius:0 8px 8px 0;font-size:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
       <span id="ep-offline-texto"></span>
       <button class="btn-ghost btn-sm" style="margin-left:8px;padding:4px 10px;" onclick="sincronizarPendientesPublico()">Sincronizar ahora</button>
     </div>
 
-    <div class="card">
-      <div class="hint" style="margin-bottom:10px;">Selecciona a quién está encuestando</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <select id="ep-zona" style="width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:14px 12px;font-size:15px;"><option value="">Zona encuestada</option></select>
-        <select id="ep-genero" style="width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:14px 12px;font-size:15px;">
-          <option value="">Género</option>
-          <option value="mujer">Mujer</option>
-          <option value="hombre">Hombre</option>
-        </select>
-        <select id="ep-rango-edad" style="width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:14px 12px;font-size:15px;">
-          <option value="">Rango de edad</option>
-          <option value="18-25">18-25</option>
-          <option value="26-40">26-40</option>
-          <option value="41-60">41-60</option>
-          <option value="60+">60+</option>
-        </select>
-        <div id="ep-preguntas-form" style="display:flex;flex-direction:column;gap:10px;"></div>
-        <button class="btn-gold" style="width:100%;padding:16px;font-size:15.5px;font-weight:700;" onclick="guardarRespuestaPublica()">Guardar y siguiente persona</button>
+    <!-- Tarjeta del formulario -->
+    <div style="background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(10,37,64,.08);border:1px solid #ececec;overflow:hidden;">
+      <div style="height:4px;background:linear-gradient(90deg,#0a2540,#9c7a1f);"></div>
+      <div style="padding:26px 22px;">
+        <div style="font-size:11px;font-weight:700;color:#9c7a1f;letter-spacing:1.2px;margin-bottom:6px;">DATOS DE LA PERSONA ENCUESTADA</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:22px;">
+          <select id="ep-zona" style="width:100%;background:#f7f6f3;border:1px solid #e0ded6;border-radius:9px;color:#16191c;padding:14px 12px;font-size:15px;"><option value="">Zona encuestada</option></select>
+          <select id="ep-genero" style="width:100%;background:#f7f6f3;border:1px solid #e0ded6;border-radius:9px;color:#16191c;padding:14px 12px;font-size:15px;">
+            <option value="">Género</option>
+            <option value="mujer">Mujer</option>
+            <option value="hombre">Hombre</option>
+          </select>
+          <select id="ep-rango-edad" style="width:100%;background:#f7f6f3;border:1px solid #e0ded6;border-radius:9px;color:#16191c;padding:14px 12px;font-size:15px;">
+            <option value="">Rango de edad</option>
+            <option value="18-25">18-25</option>
+            <option value="26-40">26-40</option>
+            <option value="41-60">41-60</option>
+            <option value="60+">60+</option>
+          </select>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:#9c7a1f;letter-spacing:1.2px;margin-bottom:10px;border-top:1px solid #ececec;padding-top:20px;">CUESTIONARIO</div>
+        <div id="ep-preguntas-form" style="display:flex;flex-direction:column;gap:16px;"></div>
+
+        <button class="btn-gold" style="width:100%;padding:17px;font-size:15.5px;font-weight:700;margin-top:22px;border-radius:10px;" onclick="guardarRespuestaPublica()">Guardar y siguiente persona</button>
       </div>
     </div>
 
-    <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--text-dim);">
+    <div style="text-align:center;margin-top:20px;font-size:11px;color:#9a9a9a;line-height:1.6;">
       Cada respuesta se guarda al instante. Si no hay señal, queda guardada en este celular y se sube sola después.
+      <div style="margin-top:8px;font-weight:600;color:#6b6b6b;">Genios Intelligence © 2026</div>
+    </div>
     </div>
   </div>
 </div>
@@ -2345,21 +2364,22 @@ async function revisarLinkDeEncuesta(){
 
   const { data: preguntas } = await supabaseClient.from('preguntas_encuesta').select('*').eq('estudio_id', encuestaId).order('orden');
   const form = document.getElementById('ep-preguntas-form');
-  form.innerHTML = (preguntas||[]).map(q => {
+  form.innerHTML = (preguntas||[]).map((q,i) => {
     if(q.tipo === 'opcion_multiple'){
       return `<div>
-        <div style="font-size:13px;color:var(--text);font-weight:600;margin-bottom:5px;">${q.texto_pregunta}</div>
-        <select data-pregunta-id="${q.id}" class="ep-input-pregunta" style="width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:13px 12px;font-size:15px;">
+        <div style="font-size:13.5px;color:#16191c;font-weight:600;margin-bottom:6px;line-height:1.4;"><span style="color:#9c7a1f;">${i+1}.</span> ${q.texto_pregunta}</div>
+        <select data-pregunta-id="${q.id}" class="ep-input-pregunta" style="width:100%;background:#f7f6f3;border:1px solid #e0ded6;border-radius:9px;color:#16191c;padding:13px 12px;font-size:15px;">
           <option value="">Selecciona una opción</option>
           ${q.opciones.map(o=>`<option value="${o}">${o}</option>`).join('')}
         </select>
       </div>`;
     }
     return `<div>
-      <div style="font-size:13px;color:var(--text);font-weight:600;margin-bottom:5px;">${q.texto_pregunta}</div>
-      <input type="text" data-pregunta-id="${q.id}" class="ep-input-pregunta" placeholder="Respuesta" style="width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:13px 12px;font-size:15px;">
+      <div style="font-size:13.5px;color:#16191c;font-weight:600;margin-bottom:6px;line-height:1.4;"><span style="color:#9c7a1f;">${i+1}.</span> ${q.texto_pregunta}</div>
+      <input type="text" data-pregunta-id="${q.id}" class="ep-input-pregunta" placeholder="Escriba su respuesta" style="width:100%;background:#f7f6f3;border:1px solid #e0ded6;border-radius:9px;color:#16191c;padding:13px 12px;font-size:15px;">
     </div>`;
   }).join('');
+
 
   actualizarIndicadorOfflinePublico();
   return true;
